@@ -24,3 +24,20 @@ n /= 2
 print("n /= 2:", n)
 n**= 2
 print("n **= 2:", n)
+
+#Operadores de Comparación
+print("Operadores de Comparación")
+print("=========================")
+print("a == b:", a == b)
+print("a != b:", a != b)
+print("a < b:", a < b)
+print("a > b:", a > b)
+print("a <= b:", a <= b)
+print("a >= b:", a >= b)
+
+#Operadores logicos
+print("Operadores Lógicos")
+print("=================")
+print("a and b:", a and b)
+print("a or b:", a or b)
+print("not a:", not a)
