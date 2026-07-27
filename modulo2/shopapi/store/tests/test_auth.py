@@ -1,4 +1,6 @@
 # store/tests/test_auth.py
+from unittest.mock import patch
+
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
@@ -6,6 +8,7 @@ from rest_framework import status
 from .helpers import create_user, get_tokens
 
 
+@patch('store.services.email.send_welcome_email')
 class RegisterTests(TestCase):
 
     def setUp(self):
@@ -18,30 +21,31 @@ class RegisterTests(TestCase):
             'password2': 'Pass1234!',
         }
 
-    def test_register_returns_jwt(self):
+    def test_register_returns_jwt(self, mock_email):
         resp = self.client.post(self.url, self.data)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertIn('access',   resp.data)
         self.assertIn('refresh',  resp.data)
         self.assertIn('is_staff', resp.data)
         self.assertFalse(resp.data['is_staff'])
+        mock_email.assert_called_once()
 
-    def test_register_passwords_do_not_match(self):
+    def test_register_passwords_do_not_match(self, mock_email):
         self.data['password2'] = 'Different!'
         resp = self.client.post(self.url, self.data)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_register_duplicate_username(self):
+    def test_register_duplicate_username(self, mock_email):
         create_user('john')
         resp = self.client.post(self.url, self.data)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_register_duplicate_email(self):
+    def test_register_duplicate_email(self, mock_email):
         create_user('other', email='john@test.com')
         resp = self.client.post(self.url, self.data)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_register_short_password(self):
+    def test_register_short_password(self, mock_email):
         self.data['password'] = self.data['password2'] = '123'
         resp = self.client.post(self.url, self.data)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
